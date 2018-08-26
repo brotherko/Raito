@@ -25,9 +25,10 @@ export default {
       const path = this.$router.resolve({ name: name })
       const process = new BrowserWindow({
         frame: false,
-        transparent: true
+        transparent: true,
+        useContentSize: true,
+        fullscreenable: true,
       })
-
       this.createWidget({
         target: name,
         ref: process,

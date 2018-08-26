@@ -22,6 +22,7 @@
     font-family: Arial;
     background: rgba(33, 33, 33, 0.7);
     -webkit-app-region: drag;
+    -webkit-user-select: none;
   }
 
   .container {
@@ -52,7 +53,9 @@
 
 
 <script>
-require('@/assets/weather/css/weather-icons.css');
+require('./icons/css/weather-icons.css');
+
+import { weatherToIcon } from './utils.js';
 
 const weatherUrl = 'http://api.openweathermap.org/data/2.5';
 const secret = 'b0bde8bf8aa4e497fdf94bd38939c7a5';
@@ -63,7 +66,6 @@ export default {
     this.getWeather();
   },
   computed: {
-    
   },
   methods: {
     getWeather: function(){
@@ -73,28 +75,8 @@ export default {
         this.current = res.data
       });
     },
-    getIconClass(icon){
-      const iconTable = {
-        '01d': 'wi-day-sunny',
-        '02d': 'wi-day-cloud',
-        '03d': 'wi-cloud',
-        '04d': 'wi-cloudy',
-        '09d': 'wi-day-showers',
-        '10d': 'wi-day-alt-rain-mix',
-        '11d': 'wi-day-thunderstorm',
-        '13d': 'wi-day-snow',
-        '50d': 'wi-day-haze',
-        '01n': 'wi-night-sunny',
-        '02n': 'wi-night-cloud',
-        '03n': 'wi-cloud',
-        '04n': 'wi-cloudy',
-        '09n': 'wi-night-alt-showers',
-        '10n': 'wi-night-alt-rain-mix',
-        '11n': 'wi-night-alt-thunderstorm',
-        '13n': 'wi-night-alt-snow',
-        '50n': 'wi-night-haze',
-      }
-      return iconTable[icon]
+    getIconClass: function(icon){
+      return weatherToIcon(icon);
     }
   },
   data: function() {

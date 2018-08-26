@@ -9,7 +9,7 @@ export default new Router({
     {
       path: '/weather',
       name: 'weather',
-      component: require('@/components/WeatherWidget').default
+      component: require('@/Widgets/WeatherWidget/index').default
     },
     {
       path: '/',

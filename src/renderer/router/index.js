@@ -3,13 +3,13 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-const Bar = { template: '<div>bar</div>' }
 export default new Router({
   routes: [
     {
       path: '/weather',
       name: 'weather',
-      component: require('@/Widgets/WeatherWidget/index').default
+      component: require('@/components/WidgetContainer').default,
+      props: { widget: 'Weather' }
     },
     {
       path: '/',

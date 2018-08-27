@@ -27,7 +27,8 @@ export default {
         frame: false,
         transparent: true,
         useContentSize: true,
-        fullscreenable: true,
+        fullscreenable: false,
+        backgroundColor: '#00000000' // white background after close dev tool fix
       })
       this.createWidget({
         target: name,

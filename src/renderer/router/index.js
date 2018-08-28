@@ -6,10 +6,9 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/weather',
-      name: 'weather',
+      path: '/widgets/:instanceId',
+      name: 'widgets',
       component: require('@/components/WidgetContainer').default,
-      props: { widget: 'Weather' }
     },
     {
       path: '/',

@@ -1,5 +1,5 @@
 <template>
-<div class="container">
+<div class="container" v-if="!loading">
 <div class="icon">
   <i class="wi" :class="getIconClass(this.current.weather[0].icon)"></i>
 </div>
@@ -60,6 +60,7 @@ export default {
       const path = `${weatherUrl}/weather?q=${location}&appid=${secret}&units=metric`;
       this.$http(path).then(res => {
         this.current = res.data;
+        this.loading = false;
       });
     },
     getIconClass: function(icon) {
@@ -88,8 +89,8 @@ export default {
   },
   data: function() {
     return {
-      current: {},
-      loading: false
+      loading: false,
+      current: {}
     };
   }
 };

@@ -1,68 +1,78 @@
 import _ from 'lodash';
+const { BrowserWindow } = require('electron').remote;
 
 const state = {
-  options: {},
+  instances: {},
   refs: {},
 }
 
 const mutations = {
-  createWidget(state, payload) {
-    const { options, refs } = state;
-
-    const option = (options[payload.target]) ? options[payload.target] :
-    {
-      position: [0, 0],
-      width: 300,
-      height: 150,
-      locked: false
+  createInstance(state, { instanceId, widgetId, options, locked, uri }){
+    state.instances = {
+      ...state.instances,
+      [instanceId]: {
+        widgetId,
+        options,
+        locked,
+        uri
+      }
     }
-
-    options[payload.target] = option;
-    refs[payload.target] = payload.ref 
   },
+
+  createRef(state, { instanceId, ref }){
+    state.refs = {
+      ...state.refs,
+      instanceId: ref 
+    }
+  },
+
   toggleLocked(state, payload){
-    const { options } = state;
-    options[payload.target].locked = !options[payload.target].locked; 
+    state.instances[payload.id].locked = !state.instances[payload.id].locked; 
   },
-  updatePosition(state, payload) {
-    const { options, refs } = state;
 
-    options[payload.target].position = payload.position
+  updatePosition(state, payload) {
+    state.instances[payload.id].options.position = payload.position
   },
+
 }
 
 const actions = {
   createWidget({ commit, state }, payload) {
-    commit('createWidget', payload);
+    commit('createInstance', payload);
 
-    const { options, refs } = state;
-    const option = options[payload.target];
-    const ref = refs[payload.target];
-
-    ref.setPosition(option.position[0], option.position[1]);
-    ref.setSize(option.width, option.height);
+    const ref = new BrowserWindow({
+      ...payload.options,
+      frame: false,
+      transparent: true,
+      useContentSize: true,
+      fullscreenable: false,
+      backgroundColor: '#00000000' // white background after close dev tool fix
+    })
     ref.loadURL(payload.uri)
+    commit('createRef', {
+      id: payload.id,
+      ref
+    });
 
     const updatePosition = _.debounce(() => {
       const position = ref.getPosition();
-      console.log(position);
       commit('updatePosition', {
-        target: payload.target,
+        id: payload.id,
         position
       })
-    }, 100)
+    }, 300)
     ref.on('move', function(event) {
       console.log('move');
       updatePosition();
     })
-
   },
+
   toggleLocked({ commit, state }, payload) {
     commit('toggleLocked', payload);
 
-    const { options, refs } = state;
-    const option = options[payload.target];
-    const ref = refs[payload.target];
+    const { instances, refs } = state;
+    const option = instances[payload.id];
+    const ref = refs[payload.id];
 
     ref.setMovable(!option.locked);
     ref.setResizable(!option.locked);

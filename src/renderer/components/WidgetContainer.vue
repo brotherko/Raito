@@ -5,14 +5,22 @@
 </template>
 
 <script>
+import { mapMutations, mapState, mapActions } from 'vuex';
 import { templates } from '@/widgets/';
-console.log(templates)
 export default {
   name: 'widget-container',
-  props: ['widget'],
+  created: function(){
+  },
   components:{
     ...templates
   },
+  computed: {
+    ...mapState(['Widgets']),
+    widget: function(){
+      const instanceId = this.$route.params.instanceId;
+      return this.Widgets.instances[instanceId].widgetId ;
+    }
+  }
 }
 </script>
 

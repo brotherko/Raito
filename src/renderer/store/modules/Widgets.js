@@ -1,87 +1,103 @@
+const { ipcRenderer } = require('electron');
+const ipcHelper = require('../../utils/ipcHelper').default;
+
 import _ from 'lodash';
-const { BrowserWindow } = require('electron').remote;
 
 const state = {
   instances: {},
   refs: {},
 }
 
+const getters = {
+  getInstancesByWidgetId: (state) => (widgetId) => {
+    const result = 
+    Object
+    .keys(state.instances)
+    .filter((instanceId) => state.instances[instanceId].widgetId === widgetId)
+    .reduce((obj, key) => { 
+      obj[key] = state.instances[key] 
+      return obj;
+    }, {})
+    return result;
+  },
+}
+
 const mutations = {
-  createInstance(state, { instanceId, widgetId, options, locked, uri }){
+  createInstance(state, { instanceId, widgetId, options, uri }){
     state.instances = {
       ...state.instances,
       [instanceId]: {
         widgetId,
         options,
-        locked,
+        locked: false,
+        enabled: true,
         uri
       }
     }
   },
 
-  createRef(state, { instanceId, ref }){
-    state.refs = {
-      ...state.refs,
-      instanceId: ref 
-    }
+  updatePosition(state, payload) {
+    state.instances[payload.instanceId].options.position = payload.position
   },
 
   toggleLocked(state, payload){
-    state.instances[payload.id].locked = !state.instances[payload.id].locked; 
+    state.instances[payload.instanceId].locked = !state.instances[payload.instanceId].locked; 
   },
 
-  updatePosition(state, payload) {
-    state.instances[payload.id].options.position = payload.position
-  },
-
+  toggleEnabled(state, payload){
+    console.log('mutation', state, payload)
+    state.instances[payload.instanceId].enabled = !state.instances[payload.instanceId].enabled; 
+  }
 }
 
-const actions = {
-  createWidget({ commit, state }, payload) {
-    commit('createInstance', payload);
 
-    const ref = new BrowserWindow({
-      ...payload.options,
-      frame: false,
-      transparent: true,
-      useContentSize: true,
-      fullscreenable: false,
-      backgroundColor: '#00000000' // white background after close dev tool fix
-    })
-    ref.loadURL(payload.uri)
-    commit('createRef', {
-      id: payload.id,
-      ref
+
+const actions = {
+
+  createWidget({ commit, state, dispatch }, { instanceId, widgetId, options, uri }) {
+    commit('createInstance', {
+      instanceId,
+      widgetId,
+      options,
+      uri
     });
 
-    const updatePosition = _.debounce(() => {
-      const position = ref.getPosition();
-      commit('updatePosition', {
-        id: payload.id,
-        position
-      })
-    }, 300)
-    ref.on('move', function(event) {
-      console.log('move');
-      updatePosition();
-    })
+    ipcHelper.openWidget({
+      instanceId,
+      options,
+      uri,
+    });
   },
 
-  toggleLocked({ commit, state }, payload) {
-    commit('toggleLocked', payload);
+  toggleLocked({ commit, state }, { instanceId }) {
+    commit('toggleLocked', { instanceId });
+    const isLocked = state.instances[instanceId].locked;
+    ipcHelper.setWidgetLocked({ instanceId, isLocked });
+  },
 
-    const { instances, refs } = state;
-    const option = instances[payload.id];
-    const ref = refs[payload.id];
-
-    ref.setMovable(!option.locked);
-    ref.setResizable(!option.locked);
+  toggleEnabled({ commit, state, dispatch }, { instanceId }){
+    const { options, uri, enabled } = state.instances[instanceId];
+    try{
+      commit('toggleEnabled', { instanceId });
+      if(enabled){
+        ipcHelper.disableWidget({ instanceId });
+      }else {
+        ipcHelper.openWidget({
+          instanceId,
+          options,
+          uri,
+        });
+        }
+    }catch(err){
+      console.log(err);
+    }
   }
 }
 
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 }

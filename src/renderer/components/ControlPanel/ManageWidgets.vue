@@ -14,6 +14,7 @@
 import { mapMutations, mapState, mapActions } from 'vuex'
 import { configs } from '@/widgets/';
 import ManageWidgetsInstances from './ManageWidgetsInstances';
+import { setTimeout } from 'timers';
 
 export default {
   name: 'manage-widgets',
@@ -28,6 +29,9 @@ export default {
   computed: {
     ...mapState(['Widgets']),
   },
+  created: function(){
+  },
+
   methods: {
     ...mapActions({
       'createWidget': 'Widgets/createWidget',
@@ -46,7 +50,6 @@ export default {
         instanceId,
         widgetId,
         options,
-        locked: false,
         uri: `${window.location.origin}/#/widgets/${instanceId}`
       })
     },

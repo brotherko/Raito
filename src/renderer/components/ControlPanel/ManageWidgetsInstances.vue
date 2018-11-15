@@ -1,15 +1,21 @@
 <template>
 <div>
   <div v-for="(instance, instanceId) in getInstancesByWidgetId(widgetId)" :key="instanceId">
-    {{ instance }}
-    <button @click="lockInstance(instanceId)">lock</button>
-    <button @click="startInstance(instanceId)">start</button>
+    {{ instance }} {{ instanceId }}
+    <button 
+    @click="toggleLockedHandler(instanceId)">
+    {{ (instance.locked) ? 'Unlock' : 'lock' }}
+    </button>
+    <button 
+    @click="toggleEnabledHandler(instanceId)">
+    {{ (instance.enabled) ? 'Disable' : 'Enable' }}
+    </button>
   </div>
 </div>
 </template>
 
 <script>
-import { mapMutations, mapState, mapActions } from 'vuex'
+import { mapMutations, mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
   props: {
@@ -17,23 +23,25 @@ export default {
   },
   computed: {
     ...mapState(['Widgets']),
+    ...mapGetters('Widgets', ['getInstancesByWidgetId']),
+  },
+  created: function(){
+
   },
   methods: {
     ...mapActions({
+      'toggleEnabled': 'Widgets/toggleEnabled',
       'toggleLocked': 'Widgets/toggleLocked',
     }),
-    getInstancesByWidgetId(widgetId){
-      console.log(widgetId, this.Widgets)
-      return Object.keys(this.Widgets.instances).filter((instanceId) => 
-      this.Widgets.instances[instanceId].widgetId === widgetId)
-    },
-    lockInstance: function(widgetId) {
+    toggleLockedHandler: function(instanceId) {
       this.toggleLocked({
-        target: widgetId
+        instanceId 
       });
     },
-    startInstance: function(widgetId) {
-
+    toggleEnabledHandler: function(instanceId) {
+      this.toggleEnabled({
+        instanceId
+      });
     },
   }
 

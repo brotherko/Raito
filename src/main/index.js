@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import _ from 'lodash';
 
 /**
  * Set `__static` path to static files in production
@@ -66,3 +67,44 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+const widgetWindows = {};
+
+ipcMain.on('open_widget_window', (event, { instanceId, options, uri }) => {
+  const widgetWindow = new BrowserWindow({
+    ...options,
+    frame: false,
+    transparent: true,
+    useContentSize: true,
+    fullscreenable: false,
+    backgroundColor: '#00000000' // white background after close dev tool fix
+  })
+  widgetWindow.loadURL(uri)
+
+  const updatePosition = _.debounce(() => {
+    const position = widgetWindow.getPosition();
+    console.log('update position');
+    mainWindow.webContents.send('update_widget_window_position', {
+      instanceId,
+      position,
+    })
+  }, 300)
+
+  widgetWindow.on('move', function(event) {
+    updatePosition();
+  })
+
+  widgetWindow.on('closed', function(event) {
+    console.log('closing');
+  })
+
+  widgetWindows[instanceId] = widgetWindow;
+})
+
+ipcMain.on('close_widget_window', (event, { instanceId }) => {
+  widgetWindows[instanceId].close(); 
+})
+
+ipcMain.on('set_widget_locked', (event, { instanceId, isLocked }) => {
+  widgetWindows[instanceId].setMovable(!isLocked);
+  widgetWindows[instanceId].setResizable(!isLocked);
+})

@@ -5,7 +5,6 @@ import _ from 'lodash';
 
 const state = {
   instances: {},
-  refs: {},
 }
 
 const getters = {
@@ -37,7 +36,8 @@ const mutations = {
   },
 
   updatePosition(state, payload) {
-    state.instances[payload.instanceId].options.position = payload.position
+    state.instances[payload.instanceId].options.x = payload.position[0];
+    state.instances[payload.instanceId].options.y = payload.position[1];
   },
 
   toggleLocked(state, payload){
@@ -45,7 +45,6 @@ const mutations = {
   },
 
   toggleEnabled(state, payload){
-    console.log('mutation', state, payload)
     state.instances[payload.instanceId].enabled = !state.instances[payload.instanceId].enabled; 
   }
 }
@@ -53,7 +52,17 @@ const mutations = {
 
 
 const actions = {
-
+  initWidgets({ state }){
+    console.log(state.instances)
+    if(state.instances.length > 0){
+      Object.keys(state.instances).map((instanceId) => {
+        const { options, uri, enabled } = state.instances[instanceId];
+        if(enabled === true){
+          ipcHelper.openWidget({ instanceId, options, uri });
+        }
+      })
+    }
+  },
   createWidget({ commit, state, dispatch }, { instanceId, widgetId, options, uri }) {
     commit('createInstance', {
       instanceId,
@@ -89,7 +98,6 @@ const actions = {
         });
         }
     }catch(err){
-      console.log(err);
     }
   }
 }

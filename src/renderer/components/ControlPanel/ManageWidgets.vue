@@ -41,7 +41,8 @@ export default {
       const instanceId = `${widgetId}-${hash}`;
 
       const options = {
-        position: [0, 0],
+        x: 0,
+        y: 0,
         width: 300,
         height: 150,
       }

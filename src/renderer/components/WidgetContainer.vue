@@ -1,11 +1,11 @@
 <template>
 <div class="widget">
-  <component :is="widget"></component>
+  <component :is="getWidgetIdByInstanceId($route.params.instanceId)"></component>
 </div>
 </template>
 
 <script>
-import { mapMutations, mapState, mapActions } from 'vuex';
+import { mapMutations, mapState, mapActions, mapGetters } from 'vuex';
 import { templates } from '@/widgets/';
 export default {
   name: 'widget-container',
@@ -16,10 +16,7 @@ export default {
   },
   computed: {
     ...mapState(['Widgets']),
-    widget: function(){
-      const instanceId = this.$route.params.instanceId;
-      return this.Widgets.instances[instanceId].widgetId ;
-    }
+    ...mapGetters('Widgets', ['getWidgetIdByInstanceId']),
   }
 }
 </script>

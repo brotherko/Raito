@@ -37,21 +37,8 @@ export default {
       'createWidget': 'Widgets/createWidget',
     }),
     createWidgetHandler: function(widgetId) {
-      const hash = [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
-      const instanceId = `${widgetId}-${hash}`;
-
-      const options = {
-        x: 0,
-        y: 0,
-        width: 300,
-        height: 150,
-      }
-
       this.createWidget({
-        instanceId,
         widgetId,
-        options,
-        uri: `${window.location.origin}/#/widgets/${instanceId}`
       })
     },
   }

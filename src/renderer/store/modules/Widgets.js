@@ -19,6 +19,9 @@ const getters = {
     }, {})
     return result;
   },
+  getWidgetIdByInstanceId: (state) => (instanceId) => {
+    return state.instances[instanceId].widgetId;
+  }
 }
 
 const mutations = {
@@ -63,8 +66,18 @@ const actions = {
       })
     }
   },
-  createWidget({ commit, state, dispatch }, { instanceId, widgetId, options, uri }) {
-    commit('createInstance', {
+  createWidget({ commit, state, dispatch }, { widgetId }) {
+    const hash = [...Array(10)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
+    const instanceId = `${widgetId}-${hash}`;
+    const options = {
+      x: 0,
+      y: 0,
+      width: 300,
+      height: 150,
+    }
+    const uri = `${window.location.origin}/#/widgets/${instanceId}`;
+
+   commit('createInstance', {
       instanceId,
       widgetId,
       options,
